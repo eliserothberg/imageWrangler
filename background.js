@@ -1,6 +1,3 @@
-let currentImageUrl = null;
-let currentTabUrl = null;
-
 // Create the context menu item
 chrome.contextMenus.create({
     id: "saveWrangledImage",
@@ -11,17 +8,14 @@ chrome.contextMenus.create({
 // Add listener for context menu item clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "saveWrangledImage") {
-        currentImageUrl = info.srcUrl;
-        currentTabUrl = tab.url;
-        chrome.action.openPopup({});
-    }
-});
+        const imageUrl = info.srcUrl;
+        const pageUrl = tab.url;
+        const defaultFolderName = 'ImageWrangler';
+        let folderName = prompt("Enter the folder name to save the image:", defaultFolderName);
 
-// Listener for messages from the popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.type === 'SAVE_IMAGE') {
-        const folderName = request.folderName || 'ImageWrangler';
-        const title = request.title || currentTabUrl;
+        if (folderName === null) {
+            folderName = defaultFolderName; // Use default if prompt is cancelled
+        }
 
         // Search for the specified folder or create it if it doesn't exist
         chrome.bookmarks.search({ title: folderName }, (results) => {
@@ -29,10 +23,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (!folderId) {
                 chrome.bookmarks.create({ title: folderName }, (newFolder) => {
                     folderId = newFolder.id;
-                    createBookmark(folderId, title, currentImageUrl);
+                    createBookmark(folderId, pageUrl, imageUrl);
                 });
             } else {
-                createBookmark(folderId, title, currentImageUrl);
+                createBookmark(folderId, pageUrl, imageUrl);
             }
         });
     }
