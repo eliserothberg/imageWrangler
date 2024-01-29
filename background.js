@@ -26,25 +26,25 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 });
 
-function createBookmark(folderId, title, url) {
+function createBookmark(folderId, pageUrl, imageUrl) {
     chrome.bookmarks.create({
         parentId: folderId,
-        title: title,
-        url: url
+        title: pageUrl,
+        url: imageUrl
     }, (bookmark) => {
         if (bookmark) {
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon48.png',
                 title: 'Bookmark Saved',
-                message: 'Your bookmark from ' + title + ' was saved successfully!'
+                message: 'The image at ' + imageUrl + ' on page ' + pageUrl + ' was saved successfully!'
             });
         } else {
             chrome.notifications.create({
                 type: 'basic',
                 iconUrl: 'images/icon48.png',
                 title: 'Bookmark Failed',
-                message: 'Failed to save the bookmark from ' + title + '.'
+                message: 'Failed to save the image ' + imageUrl + ' on page ' + pageUrl + '.'
             });
         }
     });
