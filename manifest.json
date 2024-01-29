@@ -5,7 +5,8 @@
   "description": "Right click and save images and their url to specific bookmark folders",
   "permissions": [
     "contextMenus",
-    "bookmarks"
+    "bookmarks",
+    "notifications"
   ],
   "background": {
     "service_worker": "background.js"
