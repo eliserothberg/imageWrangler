@@ -11,18 +11,32 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         const pageUrl = tab.url;
         const defaultFolderName = 'ImageWrangler';
 
-        // Search for the 'ImageWrangler' folder or create it if it doesn't exist
-        chrome.bookmarks.search({ title: defaultFolderName }, (results) => {
-            let folderId = results.length > 0 ? results[0].id : null;
-            if (!folderId) {
-                chrome.bookmarks.create({ title: defaultFolderName }, (newFolder) => {
-                    folderId = newFolder.id;
-                    createBookmark(folderId, pageUrl, imageUrl); // Image URL bookmark with page URL as title
+        // Fetch image metadata
+        fetch(imageUrl)
+            .then(response => response.blob())
+            .then(blob => {
+                // Extract image filename from the URL
+                const filename = imageUrl.split('/').pop();
+
+                // Customize the title using the page URL and filename
+                const title = `${pageUrl} - ${filename}`;
+
+                // Search for the 'ImageWrangler' folder or create it if it doesn't exist
+                chrome.bookmarks.search({ title: defaultFolderName }, (results) => {
+                    let folderId = results.length > 0 ? results[0].id : null;
+                    if (!folderId) {
+                        chrome.bookmarks.create({ title: defaultFolderName }, (newFolder) => {
+                            folderId = newFolder.id;
+                            createBookmark(folderId, title, imageUrl); // Image URL bookmark with customized title
+                        });
+                    } else {
+                        createBookmark(folderId, title, imageUrl);
+                    }
                 });
-            } else {
-                createBookmark(folderId, pageUrl, imageUrl);
-            }
-        });
+            })
+            .catch(error => {
+                console.error("Error fetching image metadata:", error);
+            });
     }
 });
 
